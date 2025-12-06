@@ -28,6 +28,7 @@ import Achievements from "./pages/Achievements";
 import TeacherDashboard from "./pages/TeacherDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import TeacherPending from "./pages/TeacherPending";
+import TeacherRequests from "./pages/TeacherRequests";
 import NotFound from "./pages/NotFound";
 import ClassesManager from "@/components/admin/ClassesManager";
 import EmailConfirmation from "./pages/EmailConfirmation";
@@ -70,6 +71,7 @@ const App = () => {
           <Route path="/teacher-dashboard" element={<TeacherDashboard />} />
           <Route path="/teacher-pending" element={<TeacherPending />} />
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/teacher-requests" element={<TeacherRequests />} />
           {/* <Route path="/admin/classes" element={<ClassesManager />} /> */}
             <Route path="/tips" element={<Dashboard />} />
             <Route path="/friend" element={<AIGuide />} />

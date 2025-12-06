@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import TeachersManager from "@/components/admin/TeachersManager";
 import StudentsManager from "@/components/admin/StudentsManager";
 import ClassesManager from "@/components/admin/ClassesManager";
@@ -11,6 +12,7 @@ import MessagingSystem from "@/components/shared/MessagingSystem";
 import SettingsPage from "@/components/admin/SettingsPage";
 import StudentEnrollment from "@/components/admin/StudentEnrollment";
 import ExamManager from "@/components/admin/ExamManager";
+import ReportsManager from "@/components/admin/ReportsManager";
 import PolicyDiagnostic from "@/components/admin/PolicyDiagnostic";
 import DataFetchDiagnostic from "@/components/DataFetchDiagnostic";
 import SchemaDiagnostic from "@/components/admin/SchemaDiagnostic";
@@ -27,13 +29,15 @@ import {
   CheckCircle,
   XCircle,
   Clock,
-  AlertTriangle
+  AlertTriangle,
+  MessageSquare
 } from "lucide-react";
 import { toast } from "sonner";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("requests");
   const [teacherRequests, setTeacherRequests] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [classes, setClasses] = useState<any[]>([]);
@@ -223,7 +227,7 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen bg-background">
+    <div className="flex flex-col lg:flex-row min-h-screen bg-background overflow-x-hidden">
       {/* Sidebar */}
       <div className="w-full lg:w-64 border-b lg:border-b-0 lg:border-r bg-card p-3 sm:p-4 space-y-3 sm:space-y-4 lg:relative">
         <div className="flex items-center justify-between lg:block">
@@ -236,30 +240,71 @@ const AdminDashboard = () => {
           </Button>
         </div>
         
-        <nav className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible -mx-3 sm:mx-0 px-3 sm:px-0 lg:space-y-2 lg:mt-8">
-          <Button variant="ghost" className="lg:w-full justify-start whitespace-nowrap text-xs sm:text-sm">
+        <nav className="flex lg:flex-col gap-2 lg:space-y-2 lg:mt-8">
+          {/* Commented out - Not currently in use */}
+          {/* <Button 
+            variant="ghost" 
+            className="lg:w-full justify-start whitespace-nowrap text-xs sm:text-sm"
+            onClick={() => {
+              const tabsList = document.querySelector('[role="tablist"]') as HTMLElement;
+              const usersTab = Array.from(tabsList?.querySelectorAll('[role="tab"]') || []).find(
+                (tab: any) => tab.textContent?.includes('Users')
+              ) as HTMLElement;
+              usersTab?.click();
+            }}
+          >
             <Users className="mr-2 h-4 w-4" />
             User Management
-          </Button>
-          <Button variant="ghost" className="lg:w-full justify-start whitespace-nowrap text-xs sm:text-sm">
+          </Button> */}
+          {/* <Button 
+            variant="ghost" 
+            className="lg:w-full justify-start whitespace-nowrap text-xs sm:text-sm"
+            onClick={() => {
+              const tabsList = document.querySelector('[role="tablist"]') as HTMLElement;
+              const classesTab = Array.from(tabsList?.querySelectorAll('[role="tab"]') || []).find(
+                (tab: any) => tab.textContent?.includes('Classes')
+              ) as HTMLElement;
+              classesTab?.click();
+            }}
+          >
             <School className="mr-2 h-4 w-4" />
             Class Management
-          </Button>
-          <Button variant="ghost" className="lg:w-full justify-start whitespace-nowrap text-xs sm:text-sm">
+          </Button> */}
+          {/* <Button variant="ghost" className="lg:w-full justify-start whitespace-nowrap text-xs sm:text-sm">
             <BarChart3 className="mr-2 h-4 w-4" />
             Analytics
-          </Button>
-          <Button variant="ghost" className="lg:w-full justify-start whitespace-nowrap text-xs sm:text-sm">
+          </Button> */}
+          {/* <Button 
+            variant="ghost" 
+            className="lg:w-full justify-start whitespace-nowrap text-xs sm:text-sm"
+            onClick={() => {
+              const tabsList = document.querySelector('[role="tablist"]') as HTMLElement;
+              const reportsTab = Array.from(tabsList?.querySelectorAll('[role="tab"]') || []).find(
+                (tab: any) => tab.textContent?.includes('Reports')
+              ) as HTMLElement;
+              reportsTab?.click();
+            }}
+          >
             <FileText className="mr-2 h-4 w-4" />
             Reports
-          </Button>
-          <Button variant="ghost" className="lg:w-full justify-start whitespace-nowrap text-xs sm:text-sm">
+          </Button> */}
+          {/* <Button 
+            variant="ghost" 
+            className="lg:w-full justify-start whitespace-nowrap text-xs sm:text-sm"
+            onClick={() => {
+              const tabsList = document.querySelector('[role="tablist"]') as HTMLElement;
+              const settingsTab = Array.from(tabsList?.querySelectorAll('[role="tab"]') || []).find(
+                (tab: any) => tab.textContent?.includes('Settings')
+              ) as HTMLElement;
+              settingsTab?.click();
+            }}
+          >
             <Settings className="mr-2 h-4 w-4" />
             Settings
-          </Button>
+          </Button> */}
         </nav>
 
-        <div className="hidden lg:block absolute bottom-4 w-56">
+        <div className="hidden lg:block absolute bottom-4 left-4 right-4">
           <Button variant="outline" className="w-full" onClick={handleLogout}>
             <LogOut className="mr-2 h-4 w-4" />
             Logout
@@ -268,7 +313,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-4 sm:p-6 lg:p-8">
+      <div className="flex-1 p-4 sm:p-6 lg:p-8 overflow-x-hidden">
         <div className="mb-4 sm:mb-6 lg:mb-8">
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold">Admin Dashboard</h2>
           <p className="text-sm sm:text-base text-muted-foreground">Manage the entire EduGuide AI platform</p>
@@ -313,118 +358,262 @@ const AdminDashboard = () => {
           </Card>
         </div>
 
-        <Tabs defaultValue="requests" className="space-y-4">
-          <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
-            <TabsList className="inline-flex w-full sm:w-auto min-w-full sm:min-w-0">
-              <TabsTrigger value="requests" className="text-xs sm:text-sm whitespace-nowrap">Teacher Requests</TabsTrigger>
-              <TabsTrigger value="teachers" className="text-xs sm:text-sm whitespace-nowrap">Teachers</TabsTrigger>
-              <TabsTrigger value="students" className="text-xs sm:text-sm whitespace-nowrap">Students</TabsTrigger>
-              <TabsTrigger value="enrollment" className="text-xs sm:text-sm whitespace-nowrap">Enrollment</TabsTrigger>
-              <TabsTrigger value="classes" className="text-xs sm:text-sm whitespace-nowrap">Classes</TabsTrigger>
-              <TabsTrigger value="exams" className="text-xs sm:text-sm whitespace-nowrap">Exams</TabsTrigger>
-              <TabsTrigger value="messages" className="text-xs sm:text-sm whitespace-nowrap">Messages</TabsTrigger>
-              <TabsTrigger value="settings" className="text-xs sm:text-sm whitespace-nowrap">Settings</TabsTrigger>
-              <TabsTrigger value="diagnostics" className="text-xs sm:text-sm whitespace-nowrap">
-                <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Policy Diagnostics</span>
-                <span className="sm:hidden">Policy</span>
-              </TabsTrigger>
-              <TabsTrigger value="data-diagnostics" className="text-xs sm:text-sm whitespace-nowrap">
-                <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Data Diagnostics</span>
-                <span className="sm:hidden">Data</span>
-              </TabsTrigger>
-              <TabsTrigger value="schema-diagnostics" className="text-xs sm:text-sm whitespace-nowrap">
-                <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Schema Diagnostics</span>
-                <span className="sm:hidden">Schema</span>
-              </TabsTrigger>
-              <TabsTrigger value="users" className="text-xs sm:text-sm whitespace-nowrap">Users</TabsTrigger>
-            </TabsList>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+          {/* Mobile Dropdown */}
+          <div className="lg:hidden">
+            <Select value={activeTab} onValueChange={(value) => {
+              if (value === "requests") {
+                navigate("/admin/teacher-requests");
+              } else {
+                setActiveTab(value);
+              }
+            }}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a section" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="requests">Teacher Requests</SelectItem>
+                <SelectItem value="teachers">Teachers</SelectItem>
+                <SelectItem value="students">Students</SelectItem>
+                <SelectItem value="enrollment">Enrollment</SelectItem>
+                <SelectItem value="classes">Classes</SelectItem>
+                <SelectItem value="exams">Exams</SelectItem>
+                <SelectItem value="reports">Reports</SelectItem>
+                <SelectItem value="messages">Messages</SelectItem>
+                <SelectItem value="settings">Settings</SelectItem>
+                <SelectItem value="diagnostics">Policy Diagnostics</SelectItem>
+                <SelectItem value="data-diagnostics">Data Diagnostics</SelectItem>
+                <SelectItem value="schema-diagnostics">Schema Diagnostics</SelectItem>
+                <SelectItem value="users">Users</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
-          <TabsContent value="requests">
-            <Card>
-              <CardHeader>
-                <CardTitle>Teacher Approval Requests</CardTitle>
-                <CardDescription>Review and approve teacher registration requests</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {teacherRequests.length === 0 ? (
-                  <p className="text-muted-foreground">No pending requests</p>
-                ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Phone</TableHead>
-                      <TableHead>Subject</TableHead>
-                      <TableHead>Qualification</TableHead>
-                      <TableHead>Experience</TableHead>
-                      <TableHead>Reason</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {teacherRequests.map((request) => (
-                        <TableRow key={request.id}>
-                          <TableCell>{request.full_name}</TableCell>
-                          <TableCell>{request.email}</TableCell>
-                          <TableCell>{request.phone || "N/A"}</TableCell>
-                          <TableCell>{request.subject || "N/A"}</TableCell>
-                          <TableCell>{request.qualification || "N/A"}</TableCell>
-                          <TableCell>{request.experience || "N/A"}</TableCell>
-                          <TableCell className="max-w-xs truncate">{request.reason || "N/A"}</TableCell>
-                          <TableCell>
-                            {request.status === "pending" && (
-                              <Badge variant="outline" className="bg-yellow-100">
-                                <Clock className="mr-1 h-3 w-3" />
-                                Pending
-                              </Badge>
-                            )}
-                            {request.status === "approved" && (
-                              <Badge variant="outline" className="bg-green-100">
-                                <CheckCircle className="mr-1 h-3 w-3" />
-                                Approved
-                              </Badge>
-                            )}
-                            {request.status === "rejected" && (
-                              <Badge variant="outline" className="bg-red-100">
-                                <XCircle className="mr-1 h-3 w-3" />
-                                Rejected
-                              </Badge>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            {request.status === "pending" && (
-                              <div className="flex gap-2">
-                                <Button 
-                                  size="sm" 
-                                  variant="default"
-                                  onClick={() => handleApproveTeacher(request.id, request.user_id)}
-                                >
-                                  Approve
-                                </Button>
-                                <Button 
-                                  size="sm" 
-                                  variant="destructive"
-                                  onClick={() => handleRejectTeacher(request.id)}
-                                >
-                                  Reject
-                                </Button>
-                              </div>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                )}
+          {/* Desktop Card Navigation */}
+          <div className="hidden lg:grid grid-cols-3 xl:grid-cols-4 gap-3">
+            <Card 
+              className="cursor-pointer transition-all hover:shadow-md hover:bg-accent/50"
+              onClick={() => navigate("/admin/teacher-requests")}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <Clock className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">Teacher Requests</p>
+                    <p className="text-xs text-muted-foreground">Review requests</p>
+                  </div>
+                </div>
               </CardContent>
             </Card>
-          </TabsContent>
+
+            <Card 
+              className={`cursor-pointer transition-all hover:shadow-md ${activeTab === "teachers" ? "ring-2 ring-primary bg-primary/5" : "hover:bg-accent/50"}`}
+              onClick={() => setActiveTab("teachers")}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-blue-500/10">
+                    <Users className="h-5 w-5 text-blue-500" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">Teachers</p>
+                    <p className="text-xs text-muted-foreground">Manage teachers</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card 
+              className={`cursor-pointer transition-all hover:shadow-md ${activeTab === "students" ? "ring-2 ring-primary bg-primary/5" : "hover:bg-accent/50"}`}
+              onClick={() => setActiveTab("students")}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-green-500/10">
+                    <Users className="h-5 w-5 text-green-500" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">Students</p>
+                    <p className="text-xs text-muted-foreground">Manage students</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card 
+              className={`cursor-pointer transition-all hover:shadow-md ${activeTab === "enrollment" ? "ring-2 ring-primary bg-primary/5" : "hover:bg-accent/50"}`}
+              onClick={() => setActiveTab("enrollment")}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-purple-500/10">
+                    <Users className="h-5 w-5 text-purple-500" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">Enrollment</p>
+                    <p className="text-xs text-muted-foreground">Student enrollment</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card 
+              className={`cursor-pointer transition-all hover:shadow-md ${activeTab === "classes" ? "ring-2 ring-primary bg-primary/5" : "hover:bg-accent/50"}`}
+              onClick={() => setActiveTab("classes")}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-orange-500/10">
+                    <School className="h-5 w-5 text-orange-500" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">Classes</p>
+                    <p className="text-xs text-muted-foreground">Manage classes</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card 
+              className={`cursor-pointer transition-all hover:shadow-md ${activeTab === "exams" ? "ring-2 ring-primary bg-primary/5" : "hover:bg-accent/50"}`}
+              onClick={() => setActiveTab("exams")}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-red-500/10">
+                    <FileText className="h-5 w-5 text-red-500" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">Exams</p>
+                    <p className="text-xs text-muted-foreground">Manage exams</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card 
+              className={`cursor-pointer transition-all hover:shadow-md ${activeTab === "reports" ? "ring-2 ring-primary bg-primary/5" : "hover:bg-accent/50"}`}
+              onClick={() => setActiveTab("reports")}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-indigo-500/10">
+                    <FileText className="h-5 w-5 text-indigo-500" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">Reports</p>
+                    <p className="text-xs text-muted-foreground">View reports</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card 
+              className={`cursor-pointer transition-all hover:shadow-md ${activeTab === "messages" ? "ring-2 ring-primary bg-primary/5" : "hover:bg-accent/50"}`}
+              onClick={() => setActiveTab("messages")}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-cyan-500/10">
+                    <MessageSquare className="h-5 w-5 text-cyan-500" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">Messages</p>
+                    <p className="text-xs text-muted-foreground">View messages</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card 
+              className={`cursor-pointer transition-all hover:shadow-md ${activeTab === "settings" ? "ring-2 ring-primary bg-primary/5" : "hover:bg-accent/50"}`}
+              onClick={() => setActiveTab("settings")}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-gray-500/10">
+                    <Settings className="h-5 w-5 text-gray-500" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">Settings</p>
+                    <p className="text-xs text-muted-foreground">App settings</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card 
+              className={`cursor-pointer transition-all hover:shadow-md ${activeTab === "diagnostics" ? "ring-2 ring-primary bg-primary/5" : "hover:bg-accent/50"}`}
+              onClick={() => setActiveTab("diagnostics")}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-yellow-500/10">
+                    <AlertTriangle className="h-5 w-5 text-yellow-500" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">Policy Diagnostics</p>
+                    <p className="text-xs text-muted-foreground">Check policies</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card 
+              className={`cursor-pointer transition-all hover:shadow-md ${activeTab === "data-diagnostics" ? "ring-2 ring-primary bg-primary/5" : "hover:bg-accent/50"}`}
+              onClick={() => setActiveTab("data-diagnostics")}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-yellow-500/10">
+                    <AlertTriangle className="h-5 w-5 text-yellow-500" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">Data Diagnostics</p>
+                    <p className="text-xs text-muted-foreground">Check data</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card 
+              className={`cursor-pointer transition-all hover:shadow-md ${activeTab === "schema-diagnostics" ? "ring-2 ring-primary bg-primary/5" : "hover:bg-accent/50"}`}
+              onClick={() => setActiveTab("schema-diagnostics")}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-yellow-500/10">
+                    <AlertTriangle className="h-5 w-5 text-yellow-500" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">Schema Diagnostics</p>
+                    <p className="text-xs text-muted-foreground">Check schema</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card 
+              className={`cursor-pointer transition-all hover:shadow-md ${activeTab === "users" ? "ring-2 ring-primary bg-primary/5" : "hover:bg-accent/50"}`}
+              onClick={() => setActiveTab("users")}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-teal-500/10">
+                    <Users className="h-5 w-5 text-teal-500" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">Users</p>
+                    <p className="text-xs text-muted-foreground">Manage users</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Teacher Requests is now a separate page - navigate to /admin/teacher-requests */}
 
           <TabsContent value="teachers">
             <TeachersManager />
@@ -444,6 +633,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="exams">
             <ExamManager />
+          </TabsContent>
+
+          <TabsContent value="reports">
+            <ReportsManager />
           </TabsContent>
 
           <TabsContent value="messages">

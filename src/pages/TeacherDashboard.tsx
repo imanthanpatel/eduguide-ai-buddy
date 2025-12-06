@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   Users, 
   FileText, 
@@ -20,11 +21,13 @@ import AttendanceManager from "@/components/teacher/AttendanceManager";
 import ResourcesManager from "@/components/teacher/ResourcesManager";
 import AnnouncementsManager from "@/components/teacher/AnnouncementsManager";
 import AssignmentManager from "@/components/teacher/AssignmentManager";
+import ReportsManager from "@/components/admin/ReportsManager";
 import MessagingSystem from "@/components/shared/MessagingSystem";
 
 const TeacherDashboard = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("overview");
   const [teacherName, setTeacherName] = useState("");
   const [students, setStudents] = useState<any[]>([]);
   const [classes, setClasses] = useState<any[]>([]);
@@ -136,7 +139,7 @@ const TeacherDashboard = () => {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen bg-background">
+    <div className="flex flex-col lg:flex-row min-h-screen bg-background overflow-x-hidden">
       {/* Sidebar */}
       <div className="w-full lg:w-64 border-b lg:border-b-0 lg:border-r bg-card p-3 sm:p-4 space-y-3 sm:space-y-4 lg:relative">
         <div className="flex items-center justify-between lg:block">
@@ -149,34 +152,27 @@ const TeacherDashboard = () => {
           </Button>
         </div>
         
-        <nav className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-x-visible -mx-3 sm:mx-0 px-3 sm:px-0 lg:space-y-2 lg:mt-8">
-          <Button variant="ghost" className="lg:w-full justify-start whitespace-nowrap text-xs sm:text-sm" onClick={() => {}}>
-            <Users className="mr-2 h-4 w-4" />
-            Students
-          </Button>
-          <Button variant="ghost" className="lg:w-full justify-start whitespace-nowrap text-xs sm:text-sm" onClick={() => {}}>
-            <FileText className="mr-2 h-4 w-4" />
-            Assignments
-          </Button>
-          <Button variant="ghost" className="lg:w-full justify-start whitespace-nowrap text-xs sm:text-sm" onClick={() => {}}>
+        <nav className="flex lg:flex-col gap-2 lg:space-y-2 lg:mt-8">
+          {/* Commented out - Not currently in use */}
+          {/* <Button variant="ghost" className="lg:w-full justify-start whitespace-nowrap text-xs sm:text-sm" onClick={() => {}}>
             <BarChart3 className="mr-2 h-4 w-4" />
             Analytics
-          </Button>
-          <Button variant="ghost" className="lg:w-full justify-start whitespace-nowrap text-xs sm:text-sm" onClick={() => {}}>
+          </Button> */}
+          {/* <Button variant="ghost" className="lg:w-full justify-start whitespace-nowrap text-xs sm:text-sm" onClick={() => {}}>
             <MessageSquare className="mr-2 h-4 w-4" />
             Messages
-          </Button>
-          <Button variant="ghost" className="lg:w-full justify-start whitespace-nowrap text-xs sm:text-sm" onClick={() => {}}>
+          </Button> */}
+          {/* <Button variant="ghost" className="lg:w-full justify-start whitespace-nowrap text-xs sm:text-sm" onClick={() => {}}>
             <BookOpen className="mr-2 h-4 w-4" />
             Resources
-          </Button>
-          <Button variant="ghost" className="lg:w-full justify-start whitespace-nowrap text-xs sm:text-sm" onClick={() => {}}>
+          </Button> */}
+          {/* <Button variant="ghost" className="lg:w-full justify-start whitespace-nowrap text-xs sm:text-sm" onClick={() => {}}>
             <Bell className="mr-2 h-4 w-4" />
             Notifications
-          </Button>
+          </Button> */}
         </nav>
 
-        <div className="hidden lg:block absolute bottom-4 w-56">
+        <div className="hidden lg:block absolute bottom-4 left-4 right-4">
           <Button variant="outline" className="w-full" onClick={handleLogout}>
             <LogOut className="mr-2 h-4 w-4" />
             Logout
@@ -185,24 +181,187 @@ const TeacherDashboard = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-4 sm:p-6 lg:p-8">
+      <div className="flex-1 p-4 sm:p-6 lg:p-8 overflow-x-hidden">
         <div className="mb-4 sm:mb-6 lg:mb-8">
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold">Welcome, {teacherName}!</h2>
           <p className="text-sm sm:text-base text-muted-foreground">Manage your classes and students</p>
         </div>
 
-        <Tabs defaultValue="overview" className="space-y-4">
-          <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
-            <TabsList className="inline-flex w-full sm:w-auto min-w-full sm:min-w-0">
-              <TabsTrigger value="overview" className="text-xs sm:text-sm">Overview</TabsTrigger>
-              <TabsTrigger value="students" className="text-xs sm:text-sm">Students</TabsTrigger>
-              <TabsTrigger value="attendance" className="text-xs sm:text-sm">Attendance</TabsTrigger>
-              <TabsTrigger value="assignments" className="text-xs sm:text-sm">Assignments</TabsTrigger>
-              <TabsTrigger value="resources" className="text-xs sm:text-sm">Resources</TabsTrigger>
-              <TabsTrigger value="announcements" className="text-xs sm:text-sm">Announcements</TabsTrigger>
-              <TabsTrigger value="messages" className="text-xs sm:text-sm">Messages</TabsTrigger>
-              <TabsTrigger value="analytics" className="text-xs sm:text-sm">Analytics</TabsTrigger>
-            </TabsList>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+          {/* Mobile Dropdown */}
+          <div className="lg:hidden">
+            <Select value={activeTab} onValueChange={setActiveTab}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a section" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="overview">Overview</SelectItem>
+                <SelectItem value="students">Students</SelectItem>
+                <SelectItem value="attendance">Attendance</SelectItem>
+                <SelectItem value="assignments">Assignments</SelectItem>
+                <SelectItem value="resources">Resources</SelectItem>
+                <SelectItem value="announcements">Announcements</SelectItem>
+                <SelectItem value="reports">Reports</SelectItem>
+                <SelectItem value="messages">Messages</SelectItem>
+                <SelectItem value="analytics">Analytics</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Desktop Card Navigation */}
+          <div className="hidden lg:grid grid-cols-3 xl:grid-cols-4 gap-3">
+            <Card 
+              className={`cursor-pointer transition-all hover:shadow-md ${activeTab === "overview" ? "ring-2 ring-primary bg-primary/5" : "hover:bg-accent/50"}`}
+              onClick={() => setActiveTab("overview")}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <BarChart3 className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">Overview</p>
+                    <p className="text-xs text-muted-foreground">Dashboard summary</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card 
+              className={`cursor-pointer transition-all hover:shadow-md ${activeTab === "students" ? "ring-2 ring-primary bg-primary/5" : "hover:bg-accent/50"}`}
+              onClick={() => setActiveTab("students")}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-blue-500/10">
+                    <Users className="h-5 w-5 text-blue-500" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">Students</p>
+                    <p className="text-xs text-muted-foreground">Manage students</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card 
+              className={`cursor-pointer transition-all hover:shadow-md ${activeTab === "attendance" ? "ring-2 ring-primary bg-primary/5" : "hover:bg-accent/50"}`}
+              onClick={() => setActiveTab("attendance")}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-green-500/10">
+                    <Users className="h-5 w-5 text-green-500" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">Attendance</p>
+                    <p className="text-xs text-muted-foreground">Track attendance</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card 
+              className={`cursor-pointer transition-all hover:shadow-md ${activeTab === "assignments" ? "ring-2 ring-primary bg-primary/5" : "hover:bg-accent/50"}`}
+              onClick={() => setActiveTab("assignments")}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-purple-500/10">
+                    <FileText className="h-5 w-5 text-purple-500" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">Assignments</p>
+                    <p className="text-xs text-muted-foreground">Manage assignments</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card 
+              className={`cursor-pointer transition-all hover:shadow-md ${activeTab === "resources" ? "ring-2 ring-primary bg-primary/5" : "hover:bg-accent/50"}`}
+              onClick={() => setActiveTab("resources")}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-orange-500/10">
+                    <BookOpen className="h-5 w-5 text-orange-500" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">Resources</p>
+                    <p className="text-xs text-muted-foreground">Learning resources</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card 
+              className={`cursor-pointer transition-all hover:shadow-md ${activeTab === "announcements" ? "ring-2 ring-primary bg-primary/5" : "hover:bg-accent/50"}`}
+              onClick={() => setActiveTab("announcements")}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-yellow-500/10">
+                    <Bell className="h-5 w-5 text-yellow-500" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">Announcements</p>
+                    <p className="text-xs text-muted-foreground">Post announcements</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card 
+              className={`cursor-pointer transition-all hover:shadow-md ${activeTab === "reports" ? "ring-2 ring-primary bg-primary/5" : "hover:bg-accent/50"}`}
+              onClick={() => setActiveTab("reports")}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-indigo-500/10">
+                    <FileText className="h-5 w-5 text-indigo-500" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">Reports</p>
+                    <p className="text-xs text-muted-foreground">Student reports</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card 
+              className={`cursor-pointer transition-all hover:shadow-md ${activeTab === "messages" ? "ring-2 ring-primary bg-primary/5" : "hover:bg-accent/50"}`}
+              onClick={() => setActiveTab("messages")}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-cyan-500/10">
+                    <MessageSquare className="h-5 w-5 text-cyan-500" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">Messages</p>
+                    <p className="text-xs text-muted-foreground">View messages</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card 
+              className={`cursor-pointer transition-all hover:shadow-md ${activeTab === "analytics" ? "ring-2 ring-primary bg-primary/5" : "hover:bg-accent/50"}`}
+              onClick={() => setActiveTab("analytics")}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-teal-500/10">
+                    <BarChart3 className="h-5 w-5 text-teal-500" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-sm">Analytics</p>
+                    <p className="text-xs text-muted-foreground">Student analytics</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           <TabsContent value="overview" className="space-y-4">
@@ -310,6 +469,10 @@ const TeacherDashboard = () => {
 
           <TabsContent value="announcements" className="space-y-4">
             <AnnouncementsManager />
+          </TabsContent>
+
+          <TabsContent value="reports" className="space-y-4">
+            <ReportsManager />
           </TabsContent>
 
           <TabsContent value="messages" className="space-y-4">

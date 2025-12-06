@@ -85,11 +85,22 @@ export default function NotificationsView() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
+      if (!user) {
+        setAnnouncements([]);
+        return;
+      }
+      
       // Get student's enrolled classes
-      const { data: enrollments } = await supabase
+      const { data: enrollments, error: enrollmentsError } = await supabase
         .from("class_enrollments")
         .select("class_id")
-        .eq("student_id", user?.id || "");
+        .eq("student_id", user.id);
+
+      if (enrollmentsError) {
+        console.error("Error loading enrollments:", enrollmentsError);
+        setAnnouncements([]);
+        return;
+      }
 
       if (!enrollments || enrollments.length === 0) {
         setAnnouncements([]);
@@ -104,10 +115,16 @@ export default function NotificationsView() {
         .in("class_id", classIds)
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error loading announcements:", error);
+        setAnnouncements([]);
+        return;
+      }
+      
       setAnnouncements(data || []);
     } catch (error: any) {
       console.error("Error loading announcements:", error);
+      setAnnouncements([]);
     }
   };
 
@@ -115,17 +132,28 @@ export default function NotificationsView() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
+      if (!user) {
+        setMessages([]);
+        return;
+      }
+      
       const { data, error } = await supabase
         .from("messages")
         .select("*")
-        .eq("receiver_id", user?.id || "")
+        .eq("receiver_id", user.id)
         .order("created_at", { ascending: false })
         .limit(20);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error loading messages:", error);
+        setMessages([]);
+        return;
+      }
+      
       setMessages(data || []);
     } catch (error: any) {
       console.error("Error loading messages:", error);
+      setMessages([]);
     }
   };
 
@@ -133,16 +161,29 @@ export default function NotificationsView() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
+      if (!user) {
+        setNotifications([]);
+        return;
+      }
+      
       const { data, error } = await supabase
         .from("notifications")
         .select("*")
-        .eq("user_id", user?.id || "")
+        .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error loading notifications:", error);
+        toast.error(`Failed to load notifications: ${error.message}`);
+        setNotifications([]);
+        return;
+      }
+      
       setNotifications(data || []);
     } catch (error: any) {
       console.error("Error loading notifications:", error);
+      toast.error(`Error loading notifications: ${error.message || 'Unknown error'}`);
+      setNotifications([]);
     }
   };
 
@@ -216,6 +257,53 @@ export default function NotificationsView() {
                     </CardContent>
                   </Card>
                 ))}
+                {announcements.map((announcement) => (
+                  <Card key={`announcement-${announcement.id}`}>
+                    <CardHeader>
+                      <div className="flex justify-between items-start">
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Megaphone className="h-4 w-4" />
+                          {announcement.title}
+                        </CardTitle>
+                        <Badge variant="outline">Announcement</Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                        {announcement.content}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        {new Date(announcement.created_at).toLocaleString()}
+                      </p>
+                    </CardContent>
+                  </Card>
+                ))}
+                {messages.map((msg) => (
+                  <Card key={`message-${msg.id}`} className={!msg.read ? "border-primary" : ""}>
+                    <CardContent className="pt-4">
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="flex items-center gap-2">
+                          <MessageSquare className="h-4 w-4" />
+                          <p className="text-sm">{msg.message}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {!msg.read && <Badge variant="default">New</Badge>}
+                          <Badge variant="outline">Message</Badge>
+                        </div>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(msg.created_at).toLocaleString()}
+                      </p>
+                    </CardContent>
+                  </Card>
+                ))}
+                {notifications.length === 0 && announcements.length === 0 && messages.length === 0 && (
+                  <div className="text-center text-muted-foreground py-12">
+                    <Bell className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p className="text-lg font-medium">No notifications yet</p>
+                    <p className="text-sm mt-2">You'll see announcements, messages, and notifications here when they arrive.</p>
+                  </div>
+                )}
               </div>
             </ScrollArea>
           </TabsContent>
